@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Awesome Travel App</title>
+        <script src="jquery-3.7.1.min.js" type="text/javascript"></script>
+    </head>
+    <body>
+        <h1>Awesome Travel App</h1>
+        <div>
+            <input type="text" id="fetchid"> <button name="Fetch" onclick="fetchClick()">Fetch Trip</button>
+        </div>
+        <div>
+            <h3>Trip Detail</h3>
+            <div id="trip"></div>
+            <div>
+                <input type="text" id="location"> <input type="text" id="arrival"> <button name="Add" onclick="addClick()">Add Location</button>
+                <br /><button name="Add" onclick="saveClick()">Save Trip</button> 
+                <button name="Add" onclick="clearClick()">Clear Trip</button>
+            </div>
+        </div>
+    </body>
+<script type="text/javascript">
+
+    var trip = {
+        id: 0,
+        locations: []
+    }
+
+    function displayTrip()
+    {
+        $('#trip').empty()
+        for(i of trip.locations)
+        {
+            $('#trip').append(i.name+" on "+i.date+"<br />");
+        }
+    }
+
+    function addClick()
+    {
+        name = $('#location').val();
+        date = $('#arrival').val();
+        trip.locations.push({
+            "name": name,
+            "date": date
+        });
+        $('#location').val("");
+        $('#arrival').val("");
+        displayTrip();
+    }
+
+    function saveClick()
+    {
+        $.ajax({
+            contentType: 'application/json',
+            data: JSON.stringify(trip),
+            dataType: 'json',
+            success: function(data){
+                console.log("save succeeded to ID "+data.id);
+            },
+            error: function(){
+                console.log("save failed");
+            },
+            processData: false,
+            type: 'POST',
+            url: 'http://127.0.0.1:3000/addtrip'
+        });
+    }
+
+    function clearClick()
+    {
+        trip.id = 0;
+        trip.locations = []
+        displayTrip();
+    }
+
+    function fetchClick()
+    {
+        id = $('#fetchid').val()
+        $.ajax({
+            dataType: 'json',
+            success: function(data){
+                console.log("load succeeded to ID "+data.id);
+                if (data.id == -1)
+                {
+                    alert("No trip");
+                }
+                else
+                {
+                    trip = data;
+                    displayTrip();
+                }
+            },
+            error: function(){
+                console.log("load failed");
+            },
+            processData: false,
+            type: 'GET',
+            url: 'http://127.0.0.1:3000/gettrip/'+id
+        });
+    }
+
+</script>
+
+</html>
